@@ -1,0 +1,382 @@
+在命令前加man 获取
+ps aux 显示系统运行的进程（用户和组）
+ll -la 列出隐藏文件
+id 获取当前用户的id
+groups 获取当前用户的组
+who 查看当前登录的用户（不同终端登录的用户）
+cat /ect/passwd 用户
+cat /etc/shadow 密码
+
+useradd 添加用户
+useradd -u 555 user1
+useradd -g user1 user2
+useradd -d /home/u2
+
+passwd 修改密码（root用户接用户名可以修改普通用户密码）
+usermod -d /home/u3 -m user2 修改用户的目录，-m表示没有则创建
+usermod -L user2 冻结帐号
+usermod -U user2 解冻帐号
+userdel users 删除用户（不会删除用户目录和邮件） 加-r删除目录、邮件
+groupadd g1 增加用户组
+cat /etc/group 查看用户组
+groupdel g1 删除用户组
+su 切换用户，不加参数切换到root 加参数（用户名）切换到其他用户 加- 切换到用户同时会切换到用户目录下
+exit 退回到原用户
+
+sudo 不切换身份执行系统权限
+visudo 修改/etc/sudoers配置文件
+## Allow root to run any commands anywhere
+root    ALL=(ALL)       ALL
+user    ALL=(ALL)       NOPASSWD:ALL 复制添加一行 表示用户（可以制定组%g1）可以从任何ALL地方登录 操作任何ALL用户 执行任ALL何命令,最后ALL可以加上NOPASSWD免输密码，最后一个不建议用ALL (相当于root用户)
+
+at 但一时刻执行一次任务
+
+find / -name a.txt  在/目录下查找文件名文件
+find / -name *.txt  
+
+locate a.txt 从数据库中查找文件（linux每天会更新文件数据库，因此查询时文件可能没有到数据库，使用updatedb更新数据库）
+which 命名 用于查找path环境变量目录中可执行命名的绝对路径
+
+压缩文件                    解压文件
+gzip a.txt                  gunzip a.txt.gz    对单个文件
+tar -zcvf  /boot a.tar.gz   tar -zxvf  a.tar.gz  /boot     可目录
+
+
+管道|  前一个命名输出的结果是下一个命名的输入 如ls -l /etc/innt.d | more
+grep [-ivnc] '匹配的字符' 文件名                    -i 不区分大小写  -v 输出行号  -c  匹配行数  -v 反向输出（不包含的意思）
+
+排序
+sort [-ntkr] 文件名 默认按每行首字母排序   -n 采取数字排序 -t指定分隔符  -k 指定第几列  -r 反向排序
+
+删除重复的内容
+uniq [-ic]  对比相同的行，删除重复，一般根sort配合使用 如cat a.log | sort | uniq
+
+cut -f指定的列 -d'分隔符'  指定的列可以是1,2,3   例如：cat /etc/passwd | cut -f1,3 -d':'
+cut -c指定列的字符   例如打印每行第1-5，7-10个字符    cat /etc/passwd | cut -c1-5,7-9
+
+tr 文本转换或者删除
+cat /etc/passwd | tr '[a-z]' '[A_Z]'   小写转大写
+cat /etc/passwd | tr -d ":"    删除：号
+
+
+paste合并
+paste -d: a.txt b.txt 将a.txt和b.txt文件每行按：号合并
+
+split 分割文件
+split -l 500 big_file.txt small_file_   按每个500行将大文件分割成小文件
+split -b 64m big_file.txt samll_file_   按每个64m将大文件分割成小文件
+
+
+网络管理
+ifconfig eth0 192.168.127.133/24  设置ip地址
+ifconfig eth0 down 关闭此网卡
+ifconfig eth0 up 打开网卡
+ifconfig -a 显示所有网卡信息
+
+
+
+
+进程管理
+ ps 参数  查询当前查询的瞬时进程状态
+参数：
+-A 列出所有进程 -e效果一样
+-a 列出不和本终端有关的所有进程
+-w 显示加宽(显示较多信息)
+-u 显示有效使用者相关信息
+aux 显示所有包含其他使用者的信息
+
+例如用ps aux 
+进程拥有者 pid  cpu负载  内存使用率  虚拟内存占用 内存使用   终端号码    进程状态      进程开始时间    累计使用cpu时间   执行的命令
+USER       PID %CPU         %MEM    VSZ           RSS          TTY      STAT             START           TIME            COMMAND
+root         1  0.0  0.0  19356  1020 ?        Ss   Sep26   0:02 /sbin/init
+
+STAT 进程状态：
+D 不可终端
+R 运行中
+S 休眠
+T 暂停
+Z 僵尸进程
+W 没有足够的空间
+< 高优先级的行程
+N 低优先级的行程
+
+top   显示系统进程信息  按1可查看到每个cpu的占用情况
+
+top - 22:41:35 up 47 days, 22:37,  1 user,  load average: 0.26, 0.27, 0.22    最近刷新时间  系统运行时间  1个用户登陆  负载（1分钟，5分钟，15分钟）
+Tasks: 137 total,   1 running, 136 sleeping,   0 stopped,   0 zombie  137个进程 1个运行 136休眠 0停止 0僵尸
+Cpu(s):  1.8%us,  0.1%sy,  0.0%ni, 98.1%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st   us用户空间占用 sy内核空间占用 ni改变过优先级的进程占用 id空闲cpu  waI/O等待百分百  hi硬中断占用 si软中断占用
+Mem:   8061396k total,  7187988k used,   873408k free,   164280k buffers   物理内存总量  已使用内存  空闲内存  缓存使用内存
+Swap:        0k total,        0k used,        0k free,  5229020k cached    同上             同上        同上      缓冲的交换总量
+
+kill -9 进程号 强制杀死进程  
+kill -15 进程号  正常退出进程
+killall 进程名
+
+
+文本处理工具
+
+awk 基于列的文本处理工具  文本以空白分割 非空白部分叫做域  默认情况下按空白分割 可以通过-F 指定分隔符
+awk的变量：
+ARGC               命令行参数个数
+ARGV               命令行参数排列
+ENVIRON            支持队列中系统环境变量的使用
+FILENAME           awk浏览的文件名
+FNR                浏览文件的记录数
+FS                 设置输入域分隔符，等价于命令行 -F选项
+NF                 浏览记录的域的个数
+NR                 已读的记录数
+OFS                输出域分隔符
+ORS                输出记录分隔符
+RS                 控制记录分隔符
+$1 $2 $0全部域
+打印$1 $4两个域 awk '{print $1,$4}' awk.txt
+打印全部域 awk '{print $0}' awk.txt
+awk -F. '{print $1,$2}' awk.txt 
+获取每行的列数
+awk '{print NF}' awk.txt 打印每行列数
+awk -F. '{print NF}' awk.txt 打印每行列数（.作为分隔符）
+awk '{print $NF}' awk.txt 打印最后一列
+awk '{print $NF-1}' awk.txt 打印倒数第二列
+cat awk.txt | awk '{print substr($1,0,6)}'  打印第一个域的1-6位
+cat awk.txt | awk '{print substr($1,lenth)}'  打印第一个域的长度
+cat awk.txt | awk 'BEGIN{total=0}{total+=$3}END{print total}'  打印第三个域的累计总和
+cat awk.txt | awk 'BEGIN{total=0}{total+=$3}END{print total/NR}'  打印第三个域的平均值 NR代表总行数
+
+
+shell 编程
+1、变量
+2、环境变量
+用ssh登陆其实是进入一个bash  输入bash进入子bash  使用export var=12 定义一个环境变量 所有的子bash都会继承此变量，父bash不能
+常用的环境变量
+CDPATH='/ect/home/'  设置完后当用cd marco时会先检查当前目录是否有marco目录，有则进入，没有就检查CDPATH下是否有目录
+EUID 当前用户的uid
+FUNCNAME 当前运行的函数名
+echo $HISTORY 记录下一条命名的编号  history 命令会打印所有已运行的命令列表，是HISTFILE 指向的文件  家目录下的.bash_history
+echo $HISTFILESIZE 打印命令历史文件记录的大小
+echo $HISTSIZE 打印历史命令的缓存区大小，用户执行的命令并不会立刻记录到HISTFILE中，会记录到缓冲中，当缓冲满或者退出shell才会记录
+echo $HOSTNAME 打印主机名
+echo $HOSTYPE 打印主机的构架
+echo $MACHTYPE 打印GNU标识
+echo $LANG 打印语言环境  设置语言环境 export LANG=zh_CN.UTF_8
+echo $PWD 打印当前目录
+PATH变量
+export PATH=/opt/marco:$PATH 增加环境变量
+
+变量定义  _或者字母开头  用=紧紧链接  变量值可以用"或者'括起 ，变量值有空格必须用"或者'括起
+变量取值  $变量名  或者  ${变量名}
+如果变量引用其他变量 如name=23   name1="$name"  则必须用"括起，用‘号括起会使引用失效
+脚本在使用变量的时候在没有声明的情况下不会报错，可使用shopt -s -o nounset 让使用未声明的变量报错
+unset 变量名/函数名    取消变量或者函数名（使变量或者函数名在内存中失效）
+
+特殊变量
+1、位置参数  $0脚本本身名字   $1第一个参数    $2第二个参数... 当位置参数>9时用{}括起  ${10}   $#参数总和    $@/$*所有参数
+
+数组  shell是弱类型的语言，因此数组没有显示类型和大小
+创建数组declare -a array    declare -a array('adb' 'sfs')   array=('adf' 'dsdfs')
+赋值array[0]='er'   
+取值${数组名[0]}  ${array[0]}取单个元素  ${array[@]}取全部元素以空格分隔打印  ${array[*]}取全部元素拼成一个字符串，空格隔开打印   ${#array[@]} 取长度 
+如果数组某个元素是字符串，可以使用${#array[2]}取字符串长度
+数组截取${array[@]:1:2}取数组全部元素的第一第二个元素  ${array[2]:2:5}取数组第二个字符串元素的第2个开始连续5个字符
+数组拼接  con={array1[@] array2[@]}
+替换 ${array[@]/helloword/helloshell}将数组的helloword替换成helloshell
+取消 unset array[0] 取消元素  unset array 取消数组
+
+
+只读变量  声明时必须赋值
+声明  readonly ro=13  
+
+
+变量作用域
+shell根C或者java语言不同，一个shell进程代表一个作用域，声明的变量在整个作用域生效，指导unset或者退出shell ,因此即使在shell的方法内声明变量都是全局变量
+因此在方法内 可使用local声明变量为局部变量,只在方法内生效
+
+转义字符
+\  将后面的字符串按字符串解析  如echo \$name  结果是:$name
+
+引用   将字符串括起来的符号
+"" 弱引用  可以引用除$、反引号、转义字符外的所有字符  意思就是$、··、\ 字符依然被解释为特殊意义  如 echo "${name}"  依然取变量名
+'' 强引用  引用所有字符  引号内的内容都解释为字符意思
+`` 反引号  将引用的字符解释为系统命名
+\
+
+
+命令替换 两种方式
+DATE=·date·  DATE=$(date) 
+
+算数运算符
+shell只支持整数运算
+
+略
+
+
+特殊字符
+1、通配符
+*   任意长度字符串  点号或者斜杠不包含  a* 匹配不到abc.txt
+？  任意单个字符
+[]  [abc]中任意一个 可用[a-z]标识a-z中任意一个
+
+大括号
+${VAR} 取变量值
+${VAR:-DEFAULT} VAR未定义用DEFALUT值
+${VAR:-DEFAULT} VAR未定义或者为空
+${VAR+VALUE} 定义了VAR变量，值为$VALUE ，否则为空字符串
+${VAR:+VALUE} 定义了VAR变量且不为空，值为$VALUE ，否则为空字符串
+${VAR?ERR} 未定义VAR 值为MSG
+${VAR:?ERR} 未定义或者为复制VAR 值为MSG
+${!PREFIX*} ${!PREFIX@} 所有以PREFIX开头的变量
+${#STR} STR长度
+${STR:POSITION} 从POSITION提取子串
+${STR:POSITION:LENGTH} 从POSITION处开始取LENGTH长度
+...
+...
+通配符扩展{x,y,x}{a,b,c}结果是所有前后任意一个的排列组合
+如ls file_{a,b}  列出file_a file_b
+
+$? 用于查看前一个命名是否有正确的执行结果 0正确 1没有正确结果
+
+
+
+测试 两种方式
+1. test expression
+2. [ expression ]
+(1)文件测试
+test file_operator FILE
+[ file_operator FILE ]
+file-operator 文件测试符:
+-b FILE   文件存在且为块文件
+-c FILE   文件存在且为字符设备
+-d FILE   文件存在且为目录
+-e FILE   文件或者目录存在
+-f FILE   文件存在且为普通文件
+-x FILE   文件存在且为可执行文件
+-w FILE   文件存在且可写
+-r FILE   文件存在且可读
+-l FILE   文件存在且为连接文件
+-p FILE   文件存在且为管道文件
+-s FILE   文件存在且大小不为0
+-S FILE   文件存在且为SOCKET文件
+-g FILE   文件存在且设置了SGID 
+-u FILE   文件存在且设置了
+-k FILE	  文件存在且设置了stickey
+-G FILE   文件存在且属于有效用户组
+-O FILE   文件存在且属于有效用户
+FILE1 -nt FILE2  FILE1比FILE2新
+FILE1 -ot FILE2  FILE1比FILE2旧
+(2)字符串测试
+-z "string" 是否为空
+-n "string"  是否非空
+"string1"="string2"
+"string1"!="string2"
+"string1">"string2"
+"string1"<"string2"
+如: [ "$str1" \> "$str2" ]   可写成 [[ "$str1" > "$str2" ]]
+
+整数比较
+test num1 num_operator num2
+num_operator:
+-eq  等于
+-gt  大于
+-lt 小于
+-ge  大于等于
+-le  小于等于
+-ne  不等于
+
+逻辑测试符
+! expression  非 !                如:   [ ! -e /etc/marco ]
+expression1 -a expression2  同时为真  &       [ -e /var/log/messages -a -e /var/log/messages01 ]
+expression1 -o expression2  一个为真  |
+
+逻辑运算符   同上
+!    ! [ -e /etc/messages ]
+&&    [ -e /etc/messages ] && [ -e /etc/messages01 ]
+||
+
+
+判断
+if expression;then
+	conmmand
+else
+	conmmand
+fi
+
+
+if expression1;
+then
+	command
+elseif expression2
+then
+	command
+else
+	commnad
+fi
+
+
+循环
+
+
+
+
+
+重定向
+I/O重定向
+文件标识符是从0到9结束的整数，指明了与进程有关的特定数据流源。
+当Linux系统启动一个进程（该进程可能用于执行Shell命令）时，
+将自动为该进程打开三个文件：标准输入、标准输出和标准错误输出，
+分别有文件标识符0、1、2标识，如果进程要打开其他的输入和输出文件，
+则从3开始标识。另外3-9是保留的标识符，可以把这些标识符指定为标准输入、
+标准输出和标准错误输出的临时连接。通常这样可以解决好多复杂的重定向请求。
+
+> 覆盖重定向  将命名的输出结果重定向大哦其他文件  默认文件标识符为1   cat /etc/maaa.txt 1>a.txt 2>b.txt 将maaa.txt的文件内容输出到a.txt文件中，如何文件不存在，将错误输出到b.txt中
+>>  追加重定向
+>&  标识输出重定向   cat anaconda-ks.cfg >> b.txt 2>&1  将正确的结果输出到b.txt 同时也将错误的输出结果重定向到b.txt
+<    标准输入重定向
+|
+
+
+
+RMP包管理命令
+安装参数
+-i  安装软件
+-v  打印详细信息
+-h  使用#号打印安装进度
+-e   删除软件
+-U  升级软件
+--replacepkge   覆盖安装
+--test      安装测试
+--nodeps    忽略软件依赖强行安装
+--force      忽略软件包及文件冲突
+
+查询参数
+-a   查询所有安装软件
+-p   查询某个安装软件
+-l   列除某个软件包所包含的所有软件
+-f   查询某个文件的所属包
+
+常用组合 
+rpm -ivh pa.rpm   安装软件
+rpm -ivh --test pa.rpm  测试安装软件包，不做安装
+rpm -ivh --relocate /=/usr/local/pa.rpm   安装并重新定义安装路径
+rpm -Uvh pa.rpm  升级软件
+rpm -Uvh pa.rpm --force --nodeps  强行升级，忽略依赖关系
+rpm -e pa --nodeps  删除软件包，忽略依赖关系
+rpm -q pa  查询某个包是否安装
+rpm -qa  查询系统中所有已安装的包
+rpm -qf /etc/auto.misc  查询某个文件属于哪个包
+rpm -ql pa  查询某个 已安装包所包含的所有文件
+rpm -api  pa.rpm 查询某个包的依赖关系
+rpm -qpi pa.rpm  查询某个包的信息
+rpm -e pa 删除包
+
+
+YUM 命名安装软件
+yum [options] [command] [package]
+yum install pakage 安装某个包
+yum groupinstall group 安装某个软件组
+yum update 更新系统中所有需要更新的包
+yum groupupdate group 更新某个软件组
+yum check-update 检查当前系统中需要更新的包
+yum list    
+yum list installed  显示系统中已安装的包
+yum info package   显示某个包的信息
+yum remove package  删除某个包（）
+yum clean 清除使用yum所产生的缓存文件
